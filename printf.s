@@ -1,33 +1,10 @@
 .section .data
-msg:
- .ascii "Hello World\n"
-.globl _start
-
-
 .section .text
-_start:
-
-#movl $0, %eax
-#movl $41, msg(,%eax,1)
-#movl $4, %eax
-#movl $1, %ebx
-#movl $2, %edx
-#movl $msg, %ecx
-#int $0x80
-
-pushl $123
-call printf
-popl %ebp
-movl %ebp, %esp
-
-movl $1, %eax
-movl $0, %ebx
-int $0x80
-
 
 #input number to be printed
 #4 bytes
 
+.globl #printf
 .type printf, @function
 printf:
 pushl %ebp 
@@ -42,8 +19,7 @@ movl 8(%ebp), %eax #copy input number to %eax
 
 #while > 0
 movl %ebp, %ecx # %ecx will be tracking memory address to store next number
-subl $1, %ecx
-#subl $10, %ecx
+#subl $1, %ecx
 movl $0, %esi #counter   
 
 loop:
