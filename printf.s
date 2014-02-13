@@ -22,9 +22,9 @@ movl %ebp, %ecx # %ecx will be tracking memory address to store next number
 #subl $1, %ecx
 movl $0, %esi #counter   
 
-loop:
+nextInt:
 cmpl $10, %esi
-jg done
+jg Alldone
 
 movl $10, %edi #divide %eax by 10 and take a reminder
 movl $0, %edx
@@ -34,8 +34,8 @@ movb %dl, (%ecx) # move 1 byte to to the reserved memory
 subl $1, %ecx
 addl $1, %esi
 
-jmp loop
-done:
+jmp nextInt
+Alldone:
 
 movl $4, %eax
 movl %ebp, %ecx

@@ -17,7 +17,10 @@ _start:
 call allocate_init
 pushl %eax
 call printf
-popl %eax
+pushl $1024
+call allocate
+pushl %eax
+call printf
 movl	$0, %ebx
 movl	$1, %eax
 int	$0x80

@@ -31,6 +31,7 @@ movl $0, %ebx
 movl $SYS_BRK, %eax
 int $LINUX_SYSCALL
 
+incl %eax #need next address
 movl %eax, heap_begin
 movl %eax, current_break
 
@@ -56,35 +57,39 @@ movl 8(%ebp), %eax  #size of memory block
 movl heap_begin, %ecx  
 loop:
 cmpl %ecx, current_break #allocate new block if %ecx points at the current_break  
-je allocate_new
+jge allocate_new
 
 cmpl HDR_SIZE_OFFSET(%ecx), %eax #check if new block of memory fits free space
 jg next_block 
 
-cmpl HDR_AVAIL_OFFSET(%ecx), UNAVAILABLE #check if new block is available
+cmpl $UNAVAILABLE, HDR_AVAIL_OFFSET(%ecx) #check if new block is available
 je next_block
 
-movl UNAVAILABLE, HDR_AVAIL_OFFSET(%ecx) #mark block as unavailable
+movl $UNAVAILABLE, HDR_AVAIL_OFFSET(%ecx) #mark block as unavailable
 movl HDR_SIZE_OFFSET(%ecx), %ebx  # save old block  size
 movl %eax, HDR_SIZE_OFFSET(%ecx) # set new size of the block
 #prepare new block
 addl %eax, %ecx
 subl %eax, %ebx
-movl AVAILABLE, HDR_AVAIL_OFFSET(%ecx)
+movl $AVAILABLE, HDR_AVAIL_OFFSET(%ecx)
 movl %ebx, HDR_SIZE_OFFSET(%ecx)
 movl %ecx, %eax #copy new block address
 jmp done
 
 next_block:   #go to the next block
-addl HEADER_SIZE_OFFSET(%ecx), %ecx
-addl HEADER_SIZE, %ecx
+addl HDR_SIZE_OFFSET(%ecx), %ecx
+addl $HEADER_SIZE, %ecx
 
 jmp loop
 
 allocate_new:
-movl SYS_BRK, %eax
-addl 8(%ebp), current_break
-movl current_break, %ebx
+movl $SYS_BRK, %eax
+movl  8(%ebp), %ebx
+addl current_break, %ebx
+movl %ebx, current_break
+movl $UNAVAILABLE, HDR_AVAIL_OFFSET(%ecx) #mark block as unavailable
+movl HDR_SIZE_OFFSET(%ecx), %ebx  # save old block  size
+movl %eax, HDR_SIZE_OFFSET(%ecx) # set new size of the block
 int $LINUX_SYSCALL 
 
 done:
