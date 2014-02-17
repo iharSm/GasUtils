@@ -86,11 +86,17 @@ allocate_new:
 movl $SYS_BRK, %eax
 movl  8(%ebp), %ebx
 addl current_break, %ebx
-movl %ebx, current_break
-movl $UNAVAILABLE, HDR_AVAIL_OFFSET(%ecx) #mark block as unavailable
-movl HDR_SIZE_OFFSET(%ecx), %ebx  # save old block  size
-movl %eax, HDR_SIZE_OFFSET(%ecx) # set new size of the block
 int $LINUX_SYSCALL 
+movl $UNAVAILABLE, HDR_AVAIL_OFFSET(%ecx) #mark block as unavailable
+movl current_break, %ebx
+subl %eax, %ebx  # - block size
+#TODO ugly
+negl %ebx # + block size 
+movl %ebx, HDR_SIZE_OFFSET(%ecx) # set new size of the block
+cmpl $0, %eax #check if system call if system call returned errors
+je done
+movl %eax, current_break #at this point %eax should contain the new break point 
+
 
 done:
 movl %ebp, %esp
